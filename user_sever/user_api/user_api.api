@@ -1,0 +1,18 @@
+syntax = "v1"
+
+type UserInfoRequest {
+	userID uint `header:"User-ID"`
+}
+
+type UserInfoResponse {
+	Nickname string `json:"nickname"`
+	Avatar   string `json:"avatar"`
+	Fans     int    `json:"fans"`
+}
+
+service user {
+	@handler userInfo
+	get /api/user/info (UserInfoRequest) returns (UserInfoResponse)
+}
+
+// goctl api go -api user_api.api -dir . --home ../../template

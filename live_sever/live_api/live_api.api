@@ -1,0 +1,77 @@
+syntax = "v1"
+
+type CreateRequest {
+	AnchorID    uint   `header:"User-ID"` //主播ID
+	Title       string `json:"title"` //标题
+	Description string `json:"description"` //直播间描述
+	Avatar      string `json:"avatar,optional"` //封面
+}
+
+type CreateResponse {
+	RoomNumber   string `json:"roomNumber"` //直播间号
+	RTMPEndpoint string `json:"rtmpEndpoint"` //RTMP推流地址
+	CreateAt     string `json:"createAt"` //创建时间
+}
+
+type EnterRequest {
+	RoomNumber string `json:"roomNumber"` //直播间号
+	UserID     uint   `json:"userId"` //用户ID
+}
+
+type LiveMessage {
+	Title       string `json:"title"` //标题
+	Description string `json:"description"` //直播间描述
+	OnlineUsers int    `json:"onlineUsers"` //在线用户数
+	RoomNumber  string `json:"roomNumber"` //直播间号
+}
+
+type EnterResponse {
+	LiveMessage LiveMessage `json:"liveMessage"` //直播间信息
+	RTMPAddress string      `json:"rtmpAddress"` //RTMP播放地址
+}
+
+type ExitRequest {
+	RoomNumber string `json:"roomNumber"` //直播间号
+	UserID     uint   `json:"userId"` //用户ID
+}
+
+type ExitResponse {}
+
+type EndRequest {
+	RoomNumber string `json:"roomNumber"` //直播间号
+	AnchorID   uint   `header:"User-ID"` //主播ID
+}
+
+type EndResponse {}
+
+type ListMessage {
+	LiveMessages []LiveMessage `json:"liveMessages"` //直播间列表
+}
+
+type PeopleRequest {
+	RoomNumber string `form:"roomNumber"` //直播间号
+	UserID     uint   `header:"User-ID"` //用户ID
+}
+
+type PeopleRespones {
+	OnlineUsers int `json:"onlineUsers"` //在线用户数
+}
+
+service live {
+	@handler create
+	post /api/live/create (CreateRequest) returns (CreateResponse) //创建直播间
+
+	@handler enter
+	post /api/live/enter (EnterRequest) returns (EnterResponse) //进入直播
+
+	@handler end
+	post /api/live/end (EndRequest) returns (EndResponse) //结束直播
+
+	@handler liveList
+	get /api/live/list returns (ListMessage) //直播列表
+
+	@handler people
+	get /api/live/ws/people (PeopleRequest) returns (PeopleRespones) //在线人数
+}
+
+// goctl api go -api live_api.api -dir . --home ../../template

@@ -1,0 +1,36 @@
+syntax = "v1"
+
+type AuthenticationRequest {
+	Token     string `header:"Token,optional"`
+	ValidPath string `header:"ValidPath,optional"`
+}
+
+type AuthenticationResponse {
+	UserID uint `json:"userId"`
+	Role   int  `json:"role"`
+}
+
+type LoginRequest {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+}
+
+type LoginResponse {
+	Token string `json:"token"`
+}
+
+service auth {
+	@handler login
+	post /api/auth/login (LoginRequest) returns (LoginResponse) //登录
+
+	@handler authentication
+	post /api/auth/authentication (AuthenticationRequest) returns (AuthenticationResponse) //认证
+
+	@handler logout
+	post /api/auth/logout returns (string) //注销
+
+	@handler register
+	post /api/auth/register (LoginRequest)
+}
+
+// goctl api go -api auth_api.api -dir . --home ../../template

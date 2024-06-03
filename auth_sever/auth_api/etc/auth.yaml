@@ -1,0 +1,26 @@
+Name: auth
+Host: 0.0.0.0
+Port: 20000
+Mysql:
+  DataSource: root:zxc3240858086@tcp(127.0.0.1:3306)/live_db?charset=utf8mb4&parseTime=True&loc=Local
+Auth:
+  AccessSecret: dfff1234
+  AccessExpire: 3600
+Log:
+  Encoding: plain
+  TimeFormat: 2006-01-02 15:04:05
+  Level: info
+  Stat: false
+Redis:
+  Addr: 127.0.0.1:6379
+  Pwd:
+  DB: 1
+Etcd: 127.0.0.1:2379
+WhiteList:
+  - /api/auth/login
+  - /api/auth/logout
+  - /api/auth/register
+KqPusherConf:
+  Brokers:
+    - 127.0.0.1:9092
+  Topic: log-topic

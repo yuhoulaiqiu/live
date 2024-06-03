@@ -1,0 +1,56 @@
+syntax = "v1"
+
+type ChatRequest {
+	UserId     uint   `header:"User-ID"`
+	RoomNumber string `form:"roomNumber"`
+}
+
+type ChatResponse {}
+
+type LotteryRequest {
+	AnchorId      uint   `header:"User-ID"`
+	Prize         string `json:"prize"`
+	Count         uint   `json:"count"`
+	LotteryMethod int    `json:"lotteryMethod"` // 0: 点击参与抽奖, 1: 发送弹幕抽奖, 2: 送礼物抽奖
+	Duration      string `json:"duration"`
+	StartTime     string `json:"startTime"`
+}
+
+type LotteryResponse {}
+
+type ParticipateLotteryRequest {
+	UserId     uint `header:"User-ID"`
+	LotteryId  uint `json:"lotteryId"`
+	MethodType int  `json:"methodType"` // 0: 点击参与抽奖, 1: 发送弹幕抽奖, 2: 送礼物抽奖
+}
+
+type ParticipateLotteryResponse {}
+
+type LotteryResultRequest {
+	LotteryId uint `form:"lotteryId"`
+}
+
+type LotteryResultResponse {
+	Winners []Winner `json:"winners"`
+}
+
+type Winner {
+	UserId uint   `json:"userId"`
+	Prize  string `json:"prize"`
+}
+
+service interact {
+	@handler chat
+	get /api/interact/chat/ws (ChatRequest) returns (ChatResponse)
+
+	@handler lotteryDraw
+	post /api/interact/lottery (LotteryRequest) returns (LotteryResponse)
+
+	@handler participateLottery
+	post /api/interact/lottery/participate (ParticipateLotteryRequest) returns (ParticipateLotteryResponse)
+
+	@handler lotteryResult
+	get /api/interact/lottery/result (LotteryResultRequest) returns (LotteryResultResponse)
+}
+
+// goctl api go -api interact_api.api -dir . --home ../../template
