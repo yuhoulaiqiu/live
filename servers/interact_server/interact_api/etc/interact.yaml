@@ -13,3 +13,8 @@ Redis:
   Pwd:
   DB: 1
 Etcd: 127.0.0.1:2379
+Telemetry1:
+  Name: user
+  Endpoint: http://jaeger:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger

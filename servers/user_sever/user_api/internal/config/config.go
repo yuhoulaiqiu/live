@@ -12,5 +12,11 @@ type Config struct {
 		Pwd  string
 		DB   int
 	}
-	Etcd string
+	Etcd       string
+	Telemetry1 struct {
+		Name     string
+		Endpoint string
+		Sampler  float64
+		Batcher  string
+	}
 }

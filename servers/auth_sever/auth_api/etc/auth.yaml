@@ -24,3 +24,8 @@ KqPusherConf:
   Brokers:
     - 127.0.0.1:9092
   Topic: log-topic
+Telemetry1:
+  Name: user
+  Endpoint: http://jaeger:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger

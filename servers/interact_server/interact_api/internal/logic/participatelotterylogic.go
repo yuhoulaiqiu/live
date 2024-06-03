@@ -2,10 +2,12 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"live/models/interact_models"
 	"live/servers/interact_server/interact_api/internal/svc"
 	"live/servers/interact_server/interact_api/internal/types"
+	"strconv"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -33,12 +35,29 @@ func (l *ParticipateLotteryLogic) ParticipateLottery(req *types.ParticipateLotte
 	}
 	//防止用户恶意调用接口，多次参与抽奖
 	var count int64
-	l.svcCtx.DB.Model(&interact_models.LotteryParticipationModel{}).Where("lottery_id = ? AND user_id = ?", req.LotteryId, req.UserId).Count(&count)
+	//查redis
+	count, err = l.svcCtx.Redis.HLen("lottery:" + strconv.Itoa(int(req.LotteryId)) + ":participants").Result()
+	if err != nil {
+		logx.Error("查询参与用户失败")
+		return nil, err
+	}
 	if count > 0 {
 		logx.Error("用户已参与抽奖")
 		return nil, errors.New("用户已参与抽奖")
-	}
 
+	}
+	//// 创建参与信息
+	//participation := &interact_models.LotteryParticipationModel{
+	//	LotteryId:  req.LotteryId,
+	//	UserId:     req.UserId,
+	//	MethodType: req.MethodType,
+	//}
+	//
+	//// 保存参与信息到数据库
+	//if err := l.svcCtx.DB.Create(&participation).Error; err != nil {
+	//	logx.Error("参与抽奖失败")
+	//	return nil, err
+	//}
 	// 创建参与信息
 	participation := &interact_models.LotteryParticipationModel{
 		LotteryId:  req.LotteryId,
@@ -46,12 +65,19 @@ func (l *ParticipateLotteryLogic) ParticipateLottery(req *types.ParticipateLotte
 		MethodType: req.MethodType,
 	}
 
-	// 保存参与信息到数据库
-	if err := l.svcCtx.DB.Create(&participation).Error; err != nil {
+	// 将参与信息转换为 JSON
+	participationJson, err := json.Marshal(participation)
+	if err != nil {
 		logx.Error("参与抽奖失败")
 		return nil, err
 	}
 
+	// 保存参与信息到 Redis
+	err = l.svcCtx.Redis.HSet("lottery:"+strconv.Itoa(int(req.LotteryId))+":participants", strconv.Itoa(int(req.UserId)), participationJson).Err()
+	if err != nil {
+		logx.Error("参与抽奖失败")
+		return nil, err
+	}
 	// 返回响应
 	return
 }

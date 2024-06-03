@@ -2,12 +2,15 @@ package logic
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"live/models/interact_models"
+	"math/rand"
+	"strconv"
+	"time"
+
 	"live/servers/interact_server/interact_api/internal/svc"
 	"live/servers/interact_server/interact_api/internal/types"
-	"math/rand"
-	"time"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )
@@ -33,18 +36,27 @@ func (l *LotteryResultLogic) LotteryResult(req *types.LotteryResultRequest) (res
 		logx.Error("抽奖不存在或尚未结束")
 		return nil, errors.New("抽奖不存在或尚未结束")
 	}
-
-	// 查找参与抽奖的用户
-	var participants []interact_models.LotteryParticipationModel
-	if err := l.svcCtx.DB.Where("lottery_id = ?", req.LotteryId).Find(&participants).Error; err != nil {
+	// 从 Redis 中获取所有参与者
+	participants, err := l.svcCtx.Redis.HGetAll("lottery:" + strconv.Itoa(int(req.LotteryId)) + ":participants").Result()
+	if err != nil {
 		logx.Error("查询参与用户失败")
 		return nil, err
 	}
-
+	// 将参与者信息从 JSON 转换为结构体
+	var participationModels []interact_models.LotteryParticipationModel
+	for _, participantJson := range participants {
+		var participation interact_models.LotteryParticipationModel
+		err = json.Unmarshal([]byte(participantJson), &participation)
+		if err != nil {
+			logx.Error("查询参与用户失败")
+			return nil, err
+		}
+		participationModels = append(participationModels, participation)
+	}
 	// 检查参与人数是否足够, 如果不足则返回参与的人
 	if len(participants) < int(lottery.Count) {
 		var users []types.Winner
-		for _, participant := range participants {
+		for _, participant := range participationModels {
 			users = append(users, types.Winner{
 				UserId: participant.UserId,
 				Prize:  lottery.Prize,
@@ -57,8 +69,10 @@ func (l *LotteryResultLogic) LotteryResult(req *types.LotteryResultRequest) (res
 
 	// 随机挑选获奖者
 	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(participants), func(i, j int) { participants[i], participants[j] = participants[j], participants[i] })
-	winners := participants[:lottery.Count]
+	rand.Shuffle(len(participants), func(i, j int) {
+		participationModels[i], participationModels[j] = participationModels[j], participationModels[i]
+	})
+	winners := participationModels[:lottery.Count]
 
 	// 存储中奖结果
 	var resultModels []interact_models.LotteryResultModel
@@ -74,7 +88,12 @@ func (l *LotteryResultLogic) LotteryResult(req *types.LotteryResultRequest) (res
 		logx.Error("存储中奖结果失败")
 		return nil, err
 	}
-
+	// 从 Redis 中删除所有参与者
+	err = l.svcCtx.Redis.Del("lottery:" + strconv.Itoa(int(req.LotteryId)) + ":participants").Err()
+	if err != nil {
+		logx.Error("删除参与者信息失败")
+		return nil, err
+	}
 	// 构建响应
 	var winnerResponses []types.Winner
 	for _, result := range resultModels {

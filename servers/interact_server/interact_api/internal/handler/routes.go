@@ -2,8 +2,9 @@
 package handler
 
 import (
-	"live/servers/interact_server/interact_api/internal/svc"
 	"net/http"
+
+	"live/servers/interact_server/interact_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
 )

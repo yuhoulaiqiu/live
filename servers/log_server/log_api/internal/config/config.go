@@ -11,4 +11,10 @@ type Config struct {
 	Mysql          struct {
 		DataSource string
 	}
+	Telemetry1 struct {
+		Name     string
+		Endpoint string
+		Sampler  float64
+		Batcher  string
+	}
 }

@@ -53,4 +53,4 @@ service interact {
 	get /api/interact/lottery/result (LotteryResultRequest) returns (LotteryResultResponse)
 }
 
-// goctl api go -api interact_api.api -dir . --home ../../template
+// goctl api go -api interact_api.api -dir . --home ../../../template
