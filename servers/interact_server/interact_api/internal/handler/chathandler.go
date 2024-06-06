@@ -3,7 +3,7 @@ package handler
 import (
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
-	"live/commen/response"
+	"live/common/response"
 	"live/models/interact_models"
 	"live/models/user_models"
 	"live/servers/interact_server/interact_api/internal/svc"
@@ -48,6 +48,7 @@ func chatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		//获取用户nickname
 		var user user_models.UserModel
 		svcCtx.DB.Where("id = ?", req.UserId).First(&user)
+
 		conn.WriteMessage(websocket.TextMessage, []byte("系统消息："+user.NickName+" 欢迎来到直播间"))
 		for {
 			_, message, err := conn.ReadMessage()

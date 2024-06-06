@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"live/commen/etcd"
-	"live/commen/middleware"
+	"live/common/etcd"
+	"live/common/middleware"
 	"live/servers/auth_sever/auth_api/internal/config"
 	"live/servers/auth_sever/auth_api/internal/handler"
 	"live/servers/auth_sever/auth_api/internal/svc"

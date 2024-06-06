@@ -1,6 +1,6 @@
 package log_models
 
-import "live/commen/models"
+import "live/common/models"
 
 type LogModel struct {
 	models.Model

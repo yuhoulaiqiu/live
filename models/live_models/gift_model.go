@@ -1,6 +1,6 @@
 package live_models
 
-import "live/commen/models"
+import "live/common/models"
 
 type GiftModel struct {
 	models.Model

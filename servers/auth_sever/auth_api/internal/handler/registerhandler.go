@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"live/commen/response"
+	"live/common/response"
 	"live/servers/auth_sever/auth_api/internal/logic"
 	"live/servers/auth_sever/auth_api/internal/svc"
 	"live/servers/auth_sever/auth_api/internal/types"

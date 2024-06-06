@@ -23,6 +23,7 @@ func main() {
 	if opt.DB {
 		db := core.InitMysql(mysqlDataSource)
 		err := db.AutoMigrate(&user_models.UserModel{},
+			&user_models.FansModel{},
 			&live_models.LiveModel{},
 			&live_models.GiftModel{},
 			&video_model.VideoModel{},
@@ -34,6 +35,10 @@ func main() {
 		)
 		if err != nil {
 			fmt.Println("数据库初始化失败", err)
+			return
+		}
+		// 添加索引
+		if err := db.Exec("CREATE INDEX idx_fans_relation ON fans_models (anchor_id, user_id)").Error; err != nil {
 			return
 		}
 		fmt.Println("数据库初始化成功")

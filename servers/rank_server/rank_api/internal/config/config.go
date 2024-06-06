@@ -1,15 +1,17 @@
 package config
 
-import (
-	"github.com/zeromicro/go-queue/kq"
-	"github.com/zeromicro/go-zero/rest"
-)
+import "github.com/zeromicro/go-zero/rest"
 
 type Config struct {
 	rest.RestConf
-	KqConsumerConf kq.KqConf
-	Mysql          struct {
+	Mysql struct {
 		DataSource string
+	}
+	Etcd  string
+	Redis struct {
+		Addr string
+		Pwd  string
+		DB   int
 	}
 	Telemetry1 struct {
 		Name     string

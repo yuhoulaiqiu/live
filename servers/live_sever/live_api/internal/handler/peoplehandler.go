@@ -3,10 +3,11 @@ package handler
 import (
 	"context"
 	"errors"
+	"github.com/go-redis/redis"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"live/commen/response"
+	"live/common/response"
 	"live/models/live_models"
 	"live/servers/live_sever/live_api/internal/svc"
 	"live/servers/live_sever/live_api/internal/types"
@@ -47,7 +48,6 @@ func peopleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			response.Response(r, w, nil, err)
 			return
 		}
-		//判断该用户是否已经在观众列表中
 
 		// 将新的用户添加到观众列表中
 		lock.Lock()
@@ -58,7 +58,10 @@ func peopleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		lock.Unlock()
 
 		// 更新 Redis 中的实时人数
-		svcCtx.Redis.Set(req.RoomNumber, len(audienceList[req.RoomNumber]), 100*time.Second)
+		svcCtx.Redis.ZAdd("room_ranking", redis.Z{
+			Score:  float64(len(audienceList[req.RoomNumber])),
+			Member: req.RoomNumber,
+		})
 
 		// 检查是否已经有一个协程在为这个房间服务
 		if _, ok := roomContexts[req.RoomNumber]; !ok {
@@ -66,7 +69,7 @@ func peopleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			ctx, cancel := context.WithCancel(context.Background())
 			// 存储上下文和取消函数
 			roomContexts[req.RoomNumber] = cancel
-			// 启动定时任务，每10秒同步一次数据到 MySQL
+			// 启动定时任务，每1秒同步一次数据到 MySQL
 			go syncAudienceCountToDB(ctx, svcCtx)
 		}
 
@@ -74,7 +77,6 @@ func peopleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		for conn := range audienceList[req.RoomNumber] {
 			conn.WriteJSON(len(audienceList[req.RoomNumber]))
 		}
-
 		for {
 			_, _, err := conn.ReadMessage()
 			if err != nil {
@@ -83,7 +85,10 @@ func peopleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 				delete(audienceList[req.RoomNumber], conn)
 				lock.Unlock()
 				// 更新 Redis 中的实时人数
-				svcCtx.Redis.Set(req.RoomNumber, len(audienceList[req.RoomNumber]), 10*time.Second)
+				svcCtx.Redis.ZAdd("room_ranking", redis.Z{
+					Score:  float64(len(audienceList[req.RoomNumber])),
+					Member: req.RoomNumber,
+				})
 				// 发送更新后的实时人数
 				for conn := range audienceList[req.RoomNumber] {
 					conn.WriteJSON(len(audienceList[req.RoomNumber]))

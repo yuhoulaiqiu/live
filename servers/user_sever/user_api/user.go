@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"live/commen/etcd"
-	"live/commen/middleware"
+	"live/common/etcd"
+	"live/common/middleware"
 	"live/servers/user_sever/user_api/internal/config"
 	"live/servers/user_sever/user_api/internal/handler"
 	"live/servers/user_sever/user_api/internal/svc"

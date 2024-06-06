@@ -1,7 +1,7 @@
 package video_model
 
 import (
-	"live/commen/models"
+	"live/common/models"
 )
 
 // VideoModel 视频/录播表

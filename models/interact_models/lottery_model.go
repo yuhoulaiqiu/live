@@ -1,7 +1,7 @@
 package interact_models
 
 import (
-	"live/commen/models"
+	"live/common/models"
 	"time"
 )
 

@@ -2,7 +2,7 @@ package {{.PkgName}}
 
 import (
 	"net/http"
-    "live/commen/response"
+    "live/common/response"
     {{.ImportPackages}}
     {{if .HasRequest}}
 	"github.com/zeromicro/go-zero/rest/httpx"

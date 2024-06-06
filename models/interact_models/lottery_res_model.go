@@ -1,6 +1,6 @@
 package interact_models
 
-import "live/commen/models"
+import "live/common/models"
 
 type LotteryResultModel struct {
 	models.Model

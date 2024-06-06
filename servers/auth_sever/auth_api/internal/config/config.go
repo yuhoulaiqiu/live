@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/zeromicro/go-queue/kq"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -30,4 +31,5 @@ type Config struct {
 		Sampler  float64
 		Batcher  string
 	}
+	KqConsumerConf kq.KqConf
 }

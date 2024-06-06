@@ -1,6 +1,6 @@
 package user_models
 
-import "live/commen/models"
+import "live/common/models"
 
 // UserModel 用户表
 type UserModel struct {

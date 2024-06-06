@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"live/common/etcd"
 	"live/common/middleware"
-	"live/servers/interact_server/interact_api/internal/config"
-	"live/servers/interact_server/interact_api/internal/handler"
-	"live/servers/interact_server/interact_api/internal/svc"
+
+	"live/servers/rank_server/rank_api/internal/config"
+	"live/servers/rank_server/rank_api/internal/handler"
+	"live/servers/rank_server/rank_api/internal/svc"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 )
 
-var configFile = flag.String("f", "etc/interact.yaml", "the config file")
+var configFile = flag.String("f", "etc/rank.yaml", "the config file")
 
 func main() {
 	flag.Parse()

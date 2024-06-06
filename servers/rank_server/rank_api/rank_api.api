@@ -1,0 +1,22 @@
+type GetRoomRankRequest {
+	TopN int64 `form:"topN"`
+}
+
+type RoomItem {
+	RoomID   string
+	Audience int
+}
+
+type GetRoomRankResponse {
+	Ranks []RoomItem
+}
+
+service rank {
+	@handler GetRoomRank
+	get /api/rank (GetRoomRankRequest) returns (GetRoomRankResponse)
+
+	@handler WebSocketHandler
+	get /api/rank/ws
+}
+
+// goctl api go -api rank_api.api -dir . --home ../../../template

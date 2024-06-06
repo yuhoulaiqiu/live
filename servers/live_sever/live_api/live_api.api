@@ -74,4 +74,4 @@ service live {
 	get /api/live/ws/people (PeopleRequest) returns (PeopleRespones) //在线人数
 }
 
-// goctl api go -api live_api.api -dir . --home ../../template
+// goctl api go -api live_api.api -dir . --home ../../../template

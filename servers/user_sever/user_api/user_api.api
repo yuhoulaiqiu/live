@@ -10,9 +10,19 @@ type UserInfoResponse {
 	Fans     int    `json:"fans"`
 }
 
+type FollowRequest {
+	UserID   uint `header:"User-ID"`
+	AnchorId uint `json:"anchorId"`
+}
+
+type FollowResponse {}
+
 service user {
 	@handler userInfo
 	get /api/user/info (UserInfoRequest) returns (UserInfoResponse)
+
+	@handler follow
+	post /api/user/follow (FollowRequest) returns (FollowResponse)
 }
 
-// goctl api go -api user_api.api -dir . --home ../../template
+// goctl api go -api user_api.api -dir . --home ../../../template
