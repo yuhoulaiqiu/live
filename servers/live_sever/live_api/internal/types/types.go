@@ -57,5 +57,4 @@ type PeopleRequest struct {
 }
 
 type PeopleRespones struct {
-	OnlineUsers int `json:"onlineUsers"` //在线用户数
 }

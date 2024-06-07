@@ -35,6 +35,14 @@ type GiftItem struct {
 	Count    int // 礼物价值
 }
 
+type GiftRankRequest struct {
+	RoomNumber string `form:"roomNumber"` //直播间号
+	UserID     uint   `header:"User-ID"`  //用户ID
+}
+
+type GiftRankResponse struct {
+}
+
 type RankItem struct {
 	RoomRank   []RoomItem
 	AnchorRank []AnchorItem

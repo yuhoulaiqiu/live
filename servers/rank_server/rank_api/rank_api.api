@@ -43,6 +43,13 @@ type RankItem {
 	GiftRank   []GiftItem
 }
 
+type GiftRankRequest {
+	RoomNumber string `form:"roomNumber"` //直播间号
+	UserID     uint   `header:"User-ID"` //用户ID
+}
+
+type GiftRankResponse {}
+
 service rank {
 	@handler GetRoomRank
 	get /api/rank (GetRoomRankRequest) returns (GetRoomRankResponse)
@@ -55,6 +62,9 @@ service rank {
 
 	@handler WebSocketHandler
 	get /api/rank/ws
+
+	@handler GiftWSHandler
+	get /api/rank/gift/ws (GiftRankRequest) returns (GiftRankResponse)
 }
 
 // goctl api go -api rank_api.api -dir . --home ../../../template

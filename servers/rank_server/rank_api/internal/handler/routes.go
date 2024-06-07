@@ -29,6 +29,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodGet,
+				Path:    "/api/rank/gift/ws",
+				Handler: GiftWSHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
 				Path:    "/api/rank/ws",
 				Handler: WebSocketHandler(serverCtx),
 			},

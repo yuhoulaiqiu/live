@@ -53,9 +53,7 @@ type PeopleRequest {
 	UserID     uint   `header:"User-ID"` //用户ID
 }
 
-type PeopleRespones {
-	OnlineUsers int `json:"onlineUsers"` //在线用户数
-}
+type PeopleRespones {}
 
 service live {
 	@handler create

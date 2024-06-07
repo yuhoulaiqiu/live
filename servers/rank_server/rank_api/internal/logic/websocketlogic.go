@@ -50,7 +50,6 @@ func (s *WebSocketService) HandleConnections(w http.ResponseWriter, r *http.Requ
 	go s.writeMessages(conn)
 	go s.broadcastRankUpdates()
 
-	// Add this line to keep the connection open
 	select {}
 }
 func (s *WebSocketService) readMessages(conn *websocket.Conn) {
