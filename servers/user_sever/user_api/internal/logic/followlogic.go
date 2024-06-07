@@ -5,8 +5,6 @@ import (
 	"errors"
 	"github.com/go-redis/redis"
 	"live/models/user_models"
-	"strconv"
-
 	"live/servers/user_sever/user_api/internal/svc"
 	"live/servers/user_sever/user_api/internal/types"
 
@@ -64,7 +62,7 @@ func (l *FollowLogic) Follow(req *types.FollowRequest) (resp *types.FollowRespon
 	err = l.svcCtx.DB.Save(&anchor).Error
 	//存入redis
 
-	err = l.svcCtx.Redis.ZAdd("fans:"+strconv.Itoa(int(req.AnchorId)), redis.Z{
+	err = l.svcCtx.Redis.ZAdd("fans_ranking", redis.Z{
 		Score:  float64(anchor.Fans),
 		Member: anchor.ID,
 	}).Err()

@@ -24,7 +24,7 @@ type EndResponse struct {
 
 type EnterRequest struct {
 	RoomNumber string `json:"roomNumber"` //直播间号
-	UserID     uint   `json:"userId"`     //用户ID
+	UserID     uint   `header:"User-ID"`  //用户ID
 }
 
 type EnterResponse struct {

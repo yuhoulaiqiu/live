@@ -39,6 +39,27 @@ type Winner {
 	Prize  string `json:"prize"`
 }
 
+type GetGiftListRequest {}
+
+type GiftItem {
+	Name  string `json:"name"`
+	Price int    `json:"price"`
+	Icon  string `json:"icon"`
+}
+
+type GetGiftListResponse {
+	Gifts []GiftItem
+}
+
+type SendGiftRequest {
+	UserID   uint `header:"User-ID"`
+	AnchorID uint `json:"anchorId"`
+	GiftID   uint `json:"giftId"`
+	Count    uint `json:"count"`
+}
+
+type SendGiftResponse {}
+
 service interact {
 	@handler chat
 	get /api/interact/chat/ws (ChatRequest) returns (ChatResponse)
@@ -51,6 +72,12 @@ service interact {
 
 	@handler lotteryResult
 	get /api/interact/lottery/result (LotteryResultRequest) returns (LotteryResultResponse)
+
+	@handler getGiftList
+	get /api/interact/gift/list (GetGiftListRequest) returns (GetGiftListResponse)
+
+	@handler sendGift
+	post /api/interact/gift/send (SendGiftRequest) returns (SendGiftResponse)
 }
 
 // goctl api go -api interact_api.api -dir . --home ../../../template

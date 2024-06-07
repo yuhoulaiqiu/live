@@ -81,7 +81,6 @@ func authenticate(req *http.Request, bodyBytes []byte) error {
 		logx.Errorf("解析认证响应失败:%v", err)
 		return err
 	}
-	fmt.Printf("认证响应:%v\n", authResponse)
 	if authResponse.Code != 0 {
 		return errors.New("验证失败")
 	}

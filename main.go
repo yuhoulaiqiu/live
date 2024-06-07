@@ -25,11 +25,10 @@ func main() {
 		err := db.AutoMigrate(&user_models.UserModel{},
 			&user_models.FansModel{},
 			&live_models.LiveModel{},
-			&live_models.GiftModel{},
+			&interact_models.GiftModel{},
 			&video_model.VideoModel{},
 			&log_models.LogModel{},
 			&interact_models.LotteryModel{},
-			&interact_models.LotteryParticipationModel{},
 			&interact_models.LotteryResultModel{},
 			&interact_models.ChatModel{},
 		)

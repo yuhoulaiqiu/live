@@ -14,13 +14,18 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/api/anchor",
+				Path:    "/api/rank",
+				Handler: GetRoomRankHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/rank/anchor",
 				Handler: GetAnchorFansRankHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,
-				Path:    "/api/rank",
-				Handler: GetRoomRankHandler(serverCtx),
+				Path:    "/api/rank/gift",
+				Handler: GetGiftRankHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,

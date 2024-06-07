@@ -99,9 +99,18 @@ func (s *WebSocketService) broadcastRankUpdates() {
 			continue
 		}
 
+		giftRankLogic := NewGetGiftRankLogic(s.ctx, s.svcCtx)
+		giftRankReq := &types.GetGiftRequest{TopN: 10} // 假设获取前10名
+		giftRankResp, err := giftRankLogic.GetGiftRank(giftRankReq)
+		if err != nil {
+			logx.Error(err)
+			continue
+		}
+
 		s.broadcast <- types.RankItem{
 			RoomRank:   roomRankResp.Ranks,
 			AnchorRank: anchorRankResp.Ranks,
+			GiftRank:   giftRankResp.Ranks,
 		}
 	}
 }

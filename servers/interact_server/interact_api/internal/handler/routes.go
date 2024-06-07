@@ -18,6 +18,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Handler: chatHandler(serverCtx),
 			},
 			{
+				Method:  http.MethodGet,
+				Path:    "/api/interact/gift/list",
+				Handler: getGiftListHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/interact/gift/send",
+				Handler: sendGiftHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodPost,
 				Path:    "/api/interact/lottery",
 				Handler: lotteryDrawHandler(serverCtx),

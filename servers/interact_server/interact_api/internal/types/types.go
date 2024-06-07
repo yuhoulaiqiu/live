@@ -9,6 +9,19 @@ type ChatRequest struct {
 type ChatResponse struct {
 }
 
+type GetGiftListRequest struct {
+}
+
+type GetGiftListResponse struct {
+	Gifts []GiftItem
+}
+
+type GiftItem struct {
+	Name  string `json:"name"`
+	Price int    `json:"price"`
+	Icon  string `json:"icon"`
+}
+
 type LotteryRequest struct {
 	AnchorId      uint   `header:"User-ID"`
 	Prize         string `json:"prize"`
@@ -36,6 +49,16 @@ type ParticipateLotteryRequest struct {
 }
 
 type ParticipateLotteryResponse struct {
+}
+
+type SendGiftRequest struct {
+	UserID   uint `header:"User-ID"`
+	AnchorID uint `json:"anchorId"`
+	GiftID   uint `json:"giftId"`
+	Count    uint `json:"count"`
+}
+
+type SendGiftResponse struct {
 }
 
 type Winner struct {

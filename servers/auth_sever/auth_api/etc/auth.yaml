@@ -20,7 +20,7 @@ WhiteList:
   - /api/auth/login
   - /api/auth/logout
   - /api/auth/register
-  - /api/interact/lottery/participate
+
 Telemetry1:
   Name: user
   Endpoint: http://jaeger:14268/api/traces

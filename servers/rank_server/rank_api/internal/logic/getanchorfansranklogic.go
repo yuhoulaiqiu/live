@@ -2,6 +2,7 @@ package logic
 
 import (
 	"context"
+	"strconv"
 
 	"live/servers/rank_server/rank_api/internal/svc"
 	"live/servers/rank_server/rank_api/internal/types"
@@ -31,8 +32,9 @@ func (l *GetAnchorFansRankLogic) GetAnchorFansRank(req *types.GetAnchorFansRankR
 
 	var fansRank []types.AnchorItem
 	for _, z := range result {
+		id, _ := strconv.Atoi(z.Member.(string))
 		fansRank = append(fansRank, types.AnchorItem{
-			AnchorID: z.Member.(string),
+			AnchorID: id,
 			Fans:     int(z.Score),
 		})
 	}

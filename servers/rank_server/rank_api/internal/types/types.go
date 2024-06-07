@@ -2,7 +2,7 @@
 package types
 
 type AnchorItem struct {
-	AnchorID string
+	AnchorID int
 	Fans     int
 }
 
@@ -14,6 +14,14 @@ type GetAnchorFansRankResponse struct {
 	Ranks []AnchorItem
 }
 
+type GetGiftRequest struct {
+	TopN int64 `form:"topN"`
+}
+
+type GetGiftResponse struct {
+	Ranks []GiftItem
+}
+
 type GetRoomRankRequest struct {
 	TopN int64 `form:"topN"`
 }
@@ -22,9 +30,15 @@ type GetRoomRankResponse struct {
 	Ranks []RoomItem
 }
 
+type GiftItem struct {
+	AnchorID int
+	Count    int // 礼物价值
+}
+
 type RankItem struct {
 	RoomRank   []RoomItem
 	AnchorRank []AnchorItem
+	GiftRank   []GiftItem
 }
 
 type RoomItem struct {

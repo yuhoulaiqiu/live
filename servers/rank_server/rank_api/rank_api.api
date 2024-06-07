@@ -16,7 +16,7 @@ type GetAnchorFansRankRequest {
 }
 
 type AnchorItem {
-	AnchorID string
+	AnchorID int
 	Fans     int
 }
 
@@ -24,9 +24,23 @@ type GetAnchorFansRankResponse {
 	Ranks []AnchorItem
 }
 
+type GetGiftRequest {
+	TopN int64 `form:"topN"`
+}
+
+type GiftItem {
+	AnchorID int
+	Count    int // 礼物价值
+}
+
+type GetGiftResponse {
+	Ranks []GiftItem
+}
+
 type RankItem {
 	RoomRank   []RoomItem
 	AnchorRank []AnchorItem
+	GiftRank   []GiftItem
 }
 
 service rank {
@@ -34,7 +48,10 @@ service rank {
 	get /api/rank (GetRoomRankRequest) returns (GetRoomRankResponse)
 
 	@handler GetAnchorFansRank
-	get /api/anchor (GetAnchorFansRankRequest) returns (GetAnchorFansRankResponse)
+	get /api/rank/anchor (GetAnchorFansRankRequest) returns (GetAnchorFansRankResponse)
+
+	@handler GetGiftRank
+	get /api/rank/gift (GetGiftRequest) returns (GetGiftResponse)
 
 	@handler WebSocketHandler
 	get /api/rank/ws
