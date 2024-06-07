@@ -64,3 +64,6 @@ live
 
 PS：创建直播间后返回：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`
 之后可以使用`ffmpeg`相关命令或者 **OBS**软件进行推流
+
+#### interact 互动服务
+
