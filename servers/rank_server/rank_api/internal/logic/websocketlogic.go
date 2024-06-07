@@ -17,7 +17,7 @@ type WebSocketService struct {
 	ctx       context.Context
 	svcCtx    *svc.ServiceContext
 	clients   map[*websocket.Conn]bool
-	broadcast chan []types.RoomItem
+	broadcast chan types.RankItem
 }
 
 func NewWebSocketService(ctx context.Context, svcCtx *svc.ServiceContext) *WebSocketService {
@@ -26,7 +26,7 @@ func NewWebSocketService(ctx context.Context, svcCtx *svc.ServiceContext) *WebSo
 		ctx:       ctx,
 		svcCtx:    svcCtx,
 		clients:   make(map[*websocket.Conn]bool),
-		broadcast: make(chan []types.RoomItem),
+		broadcast: make(chan types.RankItem),
 	}
 }
 
@@ -83,13 +83,25 @@ func (s *WebSocketService) broadcastRankUpdates() {
 	defer ticker.Stop()
 
 	for range ticker.C {
-		logic := NewGetRoomRankLogic(s.ctx, s.svcCtx)
-		req := &types.GetRoomRankRequest{TopN: 10} // 假设获取前10名
-		resp, err := logic.GetRoomRank(req)
+		roomRankLogic := NewGetRoomRankLogic(s.ctx, s.svcCtx)
+		roomRankReq := &types.GetRoomRankRequest{TopN: 10} // 假设获取前10名
+		roomRankResp, err := roomRankLogic.GetRoomRank(roomRankReq)
 		if err != nil {
 			logx.Error(err)
 			continue
 		}
-		s.broadcast <- resp.Ranks
+
+		anchorRankLogic := NewGetAnchorFansRankLogic(s.ctx, s.svcCtx)
+		anchorRankReq := &types.GetAnchorFansRankRequest{TopN: 10} // 假设获取前10名
+		anchorRankResp, err := anchorRankLogic.GetAnchorFansRank(anchorRankReq)
+		if err != nil {
+			logx.Error(err)
+			continue
+		}
+
+		s.broadcast <- types.RankItem{
+			RoomRank:   roomRankResp.Ranks,
+			AnchorRank: anchorRankResp.Ranks,
+		}
 	}
 }

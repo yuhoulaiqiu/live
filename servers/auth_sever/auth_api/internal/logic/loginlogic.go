@@ -47,34 +47,6 @@ func (l *LoginLogic) Login(req *types.LoginRequest) (resp *types.LoginResponse, 
 		err = errors.New("生成token失败")
 		return nil, err
 	}
-	//context.WithValue(l.ctx, "userID", user.ID)
-	//type Request struct {
-	//	LogType int8   `json:"logType"`
-	//	IP      string `json:"IP"`
-	//	UserID  uint   `json:"userID"`
-	//	Addr    string `json:"addr"`
-	//	Level   string `json:"level"`
-	//	Title   string `json:"title"`
-	//	Content string `json:"content"`
-	//	Service string `json:"service"`
-	//}
-	//requ := Request{
-	//	LogType: 2,
-	//	IP:      l.ctx.Value("clientIP").(string),
-	//	UserID:  user.ID,
-	//	Level:   "info",
-	//	Title:   user.NickName + " 登录成功",
-	//	Content: "登录成功",
-	//	Service: l.svcCtx.Config.Name,
-	//}
-	//byteData, err := json.Marshal(requ)
-	//if err != nil {
-	//	logx.Errorf("json转化失败:%v", err)
-	//}
-	//
-	//err = l.svcCtx.KqPusherClient.Push(string(byteData))
-	//if err != nil {
-	//	fmt.Printf("push error:%v", err)
-	//}
+
 	return &types.LoginResponse{Token: token}, nil
 }

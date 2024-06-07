@@ -11,9 +11,30 @@ type GetRoomRankResponse {
 	Ranks []RoomItem
 }
 
+type GetAnchorFansRankRequest {
+	TopN int64 `form:"topN"`
+}
+
+type AnchorItem {
+	AnchorID string
+	Fans     int
+}
+
+type GetAnchorFansRankResponse {
+	Ranks []AnchorItem
+}
+
+type RankItem {
+	RoomRank   []RoomItem
+	AnchorRank []AnchorItem
+}
+
 service rank {
 	@handler GetRoomRank
 	get /api/rank (GetRoomRankRequest) returns (GetRoomRankResponse)
+
+	@handler GetAnchorFansRank
+	get /api/anchor (GetAnchorFansRankRequest) returns (GetAnchorFansRankResponse)
 
 	@handler WebSocketHandler
 	get /api/rank/ws

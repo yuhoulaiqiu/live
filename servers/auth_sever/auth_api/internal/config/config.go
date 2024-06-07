@@ -1,7 +1,6 @@
 package config
 
 import (
-	"github.com/zeromicro/go-queue/kq"
 	"github.com/zeromicro/go-zero/rest"
 )
 
@@ -20,16 +19,11 @@ type Config struct {
 		Pwd  string
 		DB   int
 	}
-	WhiteList    []string //白名单
-	KqPusherConf struct {
-		Brokers []string
-		Topic   string
-	}
+	WhiteList  []string //白名单
 	Telemetry1 struct {
 		Name     string
 		Endpoint string
 		Sampler  float64
 		Batcher  string
 	}
-	KqConsumerConf kq.KqConf
 }

@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 	"live/core"
 	"live/servers/auth_sever/auth_api/internal/config"
+	"time"
 )
 
 type ServiceContext struct {
@@ -15,13 +16,32 @@ type ServiceContext struct {
 	KqPusherClient *kq.Pusher
 }
 
+func (s ServiceContext) Deadline() (deadline time.Time, ok bool) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s ServiceContext) Done() <-chan struct{} {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s ServiceContext) Err() error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (s ServiceContext) Value(key any) any {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewServiceContext(c config.Config) *ServiceContext {
 	mysqlDb := core.InitMysql(c.Mysql.DataSource)
 	client := core.InitRedis(c.Redis.Addr, c.Redis.Pwd, c.Redis.DB)
 	return &ServiceContext{
-		Config:         c,
-		DB:             mysqlDb,
-		Redis:          client,
-		KqPusherClient: kq.NewPusher(c.KqPusherConf.Brokers, c.KqPusherConf.Topic),
+		Config: c,
+		DB:     mysqlDb,
+		Redis:  client,
 	}
 }

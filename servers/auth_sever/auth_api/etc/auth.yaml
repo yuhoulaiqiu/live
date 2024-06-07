@@ -20,17 +20,9 @@ WhiteList:
   - /api/auth/login
   - /api/auth/logout
   - /api/auth/register
+  - /api/interact/lottery/participate
 Telemetry1:
   Name: user
   Endpoint: http://jaeger:14268/api/traces
   Sampler: 1.0
   Batcher: jaeger
-KqConsumerConf:
-  Name: kqConsumer
-  Brokers:
-    - 127.0.0.1:9092
-  Group: kqConsumer
-  Topic: auth-request
-  Offset: first
-  Consumers: 8
-  Processors: 8
