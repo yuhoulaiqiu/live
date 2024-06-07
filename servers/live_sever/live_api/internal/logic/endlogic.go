@@ -37,5 +37,7 @@ func (l *EndLogic) End(req *types.EndRequest) (resp *types.EndResponse, err erro
 	//结束直播
 	liveModel.IsStart = false
 	l.svcCtx.DB.Save(&liveModel)
+	//删除redis中当日礼物信息
+	l.svcCtx.Redis.Del("gift_ranking" + liveModel.RoomNumber)
 	return
 }

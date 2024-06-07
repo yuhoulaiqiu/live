@@ -79,8 +79,9 @@ func (l *SendGiftLogic) SendGift(req *types.SendGiftRequest) (*types.SendGiftRes
 		return nil, err
 	}
 	// 将送礼记录写入redis
-	//总记录：哪个直播间收益最高
+	//总记录：哪个直播间收益最高,过期时间为一天
 	l.svcCtx.Redis.ZIncrBy("gift_ranking", price*float64(req.Count), strconv.Itoa(int(req.AnchorID)))
+
 	//记录直播间内用户送礼物记录:榜一大哥
 	l.svcCtx.Redis.ZIncrBy("gift_ranking_"+strconv.Itoa(int(req.AnchorID)), price*float64(req.Count), strconv.Itoa(int(req.UserID)))
 	return &types.SendGiftResponse{}, nil
