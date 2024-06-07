@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
 	"live/common/response"
@@ -17,6 +18,11 @@ import (
 // 直播间列表
 var roomList = make(map[string]map[*websocket.Conn]bool)
 var lock = sync.RWMutex{}
+
+type Msg struct {
+	Msg      string `json:"msg"`
+	Username string `json:"username"`
+}
 
 func chatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -49,7 +55,7 @@ func chatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		var user user_models.UserModel
 		svcCtx.DB.Where("id = ?", req.UserId).First(&user)
 
-		conn.WriteMessage(websocket.TextMessage, []byte("系统消息："+user.NickName+" 欢迎来到直播间"))
+		conn.WriteMessage(websocket.TextMessage, []byte("系统消息："+user.UserName+" 欢迎来到直播间"))
 		for {
 			_, message, err := conn.ReadMessage()
 			if err != nil {
@@ -66,11 +72,18 @@ func chatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			chat.Msg = string(message)
 			svcCtx.DB.Create(&chat)
 			// 将消息添加上用户昵称
-			message = []byte(user.NickName + "：" + string(message))
+			var msg = Msg{
+				Msg:      string(message),
+				Username: user.UserName,
+			}
+			data, err := json.Marshal(msg)
+			if err != nil {
+				return
+			}
 			// 将消息发送给直播间的所有其他用户
 			for userConn := range roomList[req.RoomNumber] {
 				if userConn != conn {
-					userConn.WriteMessage(websocket.TextMessage, message)
+					userConn.WriteMessage(websocket.TextMessage, data)
 				}
 			}
 		}
