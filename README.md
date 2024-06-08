@@ -91,7 +91,7 @@ live
 
 emmmmmm
 
-![](models/images/wo.jpg)
+![](./models/images/wo.jpg)
 
 
 
