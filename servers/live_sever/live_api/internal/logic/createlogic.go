@@ -80,6 +80,5 @@ func (l *CreateLogic) Create(req *types.CreateRequest) (resp *types.CreateRespon
 	rtmpEndpoint := "rtmp://localhost:1935/live/" + channelKey
 	resp.RTMPEndpoint = rtmpEndpoint
 	//开始推流
-	//这部分通常是在主播的客户端应用中完成的，后端只需要提供RTMP推流地址
 	return resp, nil
 }

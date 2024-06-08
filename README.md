@@ -63,7 +63,17 @@ live
 直播服务中提供四个api接口，一个websocket连接：创建/结束直播，进入/离开直播间，ws链接用于实时获取当前直播间在线人数
 
 PS：创建直播间后返回：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`
-之后可以使用`ffmpeg`相关命令或者 **OBS**软件进行推流
+之后用户可以使用`ffmpeg`相关命令或者 **OBS软件**进行推流
+
+1. **前端获取媒体流**：用户授权并获取摄像头和麦克风流。
+2. **前端请求创建直播**：前端通过HTTP请求后端API创建直播会话。
+3. **前端建立WebRTC连接**：前端创建 `RTCPeerConnection` 并添加媒体流。
+4. **前端建立WebSocket连接**：前端连接到后端WebSocket服务器。
+5. **后端处理WebSocket连接**：后端接受并管理WebSocket连接。
+6. **前端创建和发送Offer**：前端创建WebRTC Offer并发送到后端。
+7. **后端处理Offer并生成Answer**：后端处理Offer并返回Answer。
+8. **ICE候选交换**：前端和后端通过WebSocket交换ICE候选。
+9. **推流到RTMP服务器**：后端使用 `ffmpeg` 将WebRTC媒体流推送到RTMP服务器。
 
 #### interact 互动服务
 
