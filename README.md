@@ -91,7 +91,7 @@ live
 
 emmmmmm
 
-<img src="https://tiebapic.baidu.com/forum/pic/item/01ffc8cec3fdfc036b576c82923f8794a4c226e5.jpg?tbpicau=2024-06-19-05_da2732b9355f369c0cacbef322187e52" alt=""/>
+<img src="models/images/wo.jpg" alt=""/>
 
 
 
