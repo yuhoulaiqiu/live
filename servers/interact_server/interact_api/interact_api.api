@@ -1,8 +1,16 @@
 syntax = "v1"
 
-type ChatRequest {
+type ChatWsRequest {
 	UserId     uint   `header:"User-ID"`
 	RoomNumber string `form:"roomNumber"`
+}
+
+type ChatWsResponse {}
+
+type ChatRequest {
+	UserId     uint   `header:"User-ID"`
+	RoomNumber string `json:"roomNumber"`
+	Content    string `json:"content"`
 }
 
 type ChatResponse {}
@@ -61,8 +69,11 @@ type SendGiftRequest {
 type SendGiftResponse {}
 
 service interact {
-	@handler chat
+	@handler chatws
 	get /api/interact/chat/ws (ChatRequest) returns (ChatResponse)
+
+	@handler chat
+	post /api/interact/chat (ChatRequest) returns (ChatResponse)
 
 	@handler lotteryDraw
 	post /api/interact/lottery (LotteryRequest) returns (LotteryResponse)

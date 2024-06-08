@@ -3,10 +3,19 @@ package types
 
 type ChatRequest struct {
 	UserId     uint   `header:"User-ID"`
-	RoomNumber string `form:"roomNumber"`
+	RoomNumber string `json:"roomNumber"`
+	Content    string `json:"content"`
 }
 
 type ChatResponse struct {
+}
+
+type ChatWsRequest struct {
+	UserId     uint   `header:"User-ID"`
+	RoomNumber string `form:"roomNumber"`
+}
+
+type ChatWsResponse struct {
 }
 
 type GetGiftListRequest struct {

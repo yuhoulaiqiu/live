@@ -13,9 +13,14 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 	server.AddRoutes(
 		[]rest.Route{
 			{
+				Method:  http.MethodPost,
+				Path:    "/api/interact/chat",
+				Handler: chatHandler(serverCtx),
+			},
+			{
 				Method:  http.MethodGet,
 				Path:    "/api/interact/chat/ws",
-				Handler: chatHandler(serverCtx),
+				Handler: chatWsHandler(serverCtx),
 			},
 			{
 				Method:  http.MethodGet,

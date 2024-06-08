@@ -2,6 +2,8 @@ package logic
 
 import (
 	"context"
+	"live/models/interact_models"
+
 	"live/servers/interact_server/interact_api/internal/svc"
 	"live/servers/interact_server/interact_api/internal/types"
 
@@ -23,7 +25,10 @@ func NewChatLogic(ctx context.Context, svcCtx *svc.ServiceContext) *ChatLogic {
 }
 
 func (l *ChatLogic) Chat(req *types.ChatRequest) (resp *types.ChatResponse, err error) {
-	// todo: add your logic here and delete this line
-
+	var chat interact_models.ChatModel
+	chat.RoomNumber = req.RoomNumber
+	chat.SendUserId = req.UserId
+	chat.Msg = req.Content
+	l.svcCtx.DB.Create(&chat)
 	return
 }
