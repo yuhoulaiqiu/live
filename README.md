@@ -63,7 +63,7 @@ live
 
 直播服务中提供四个api接口，一个websocket连接：创建/结束直播，进入/离开直播间，ws链接用于实时获取当前直播间在线人数、处理WebRTC Offer、交换ICE候选
 
-**创建直播法一：**创建直播间后返回类似于：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`的推流地址，之后用户可以使用`ffmpeg`相关命令或者 **OBS软件**进行推流
+**创建直播法一**:创建直播间后返回类似于：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`的推流地址，之后用户可以使用`ffmpeg`相关命令或者 **OBS软件**进行推流
 
 **创建直播法二：**(需要前端配合，无法测试到底对不对(╥﹏╥)
 
@@ -91,7 +91,7 @@ live
 
 emmmmmm
 
-<img src="models/images/wo.jpg" alt=""/>
+![](models/images/wo.jpg)
 
 
 

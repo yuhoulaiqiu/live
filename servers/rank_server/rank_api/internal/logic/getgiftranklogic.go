@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"strconv"
+	"time"
 
 	"live/servers/rank_server/rank_api/internal/svc"
 	"live/servers/rank_server/rank_api/internal/types"
@@ -25,7 +26,7 @@ func NewGetGiftRankLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetGi
 }
 
 func (l *GetGiftRankLogic) GetGiftRank(req *types.GetGiftRequest) (resp *types.GetGiftResponse, err error) {
-	result, err := l.svcCtx.Redis.ZRevRangeWithScores("gift_ranking", 0, req.TopN-1).Result()
+	result, err := l.svcCtx.Redis.ZRevRangeWithScores("gift_ranking_"+strconv.Itoa(time.Now().Day()), 0, req.TopN-1).Result()
 	if err != nil {
 		return nil, err
 	}

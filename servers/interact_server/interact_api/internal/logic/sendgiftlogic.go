@@ -8,6 +8,7 @@ import (
 	"live/servers/interact_server/interact_api/internal/svc"
 	"live/servers/interact_server/interact_api/internal/types"
 	"strconv"
+	"time"
 )
 
 type SendGiftLogic struct {
@@ -80,10 +81,11 @@ func (l *SendGiftLogic) SendGift(req *types.SendGiftRequest) (*types.SendGiftRes
 	}
 	// 将送礼记录写入redis
 	//总记录：哪个直播间收益最高,过期时间为一天
-	l.svcCtx.Redis.ZIncrBy("gift_ranking", price*float64(req.Count), strconv.Itoa(int(req.AnchorID)))
-
+	l.svcCtx.Redis.ZIncrBy("gift_ranking_"+strconv.Itoa(time.Now().Day()), price*float64(req.Count), strconv.Itoa(int(req.AnchorID)))
+	l.svcCtx.Redis.Expire("gift_ranking_"+strconv.Itoa(time.Now().Day()), 24*time.Hour)
 	//记录直播间内用户送礼物记录:榜一大哥
-	l.svcCtx.Redis.ZIncrBy("gift_ranking_"+strconv.Itoa(int(req.AnchorID)), price*float64(req.Count), strconv.Itoa(int(req.UserID)))
+	l.svcCtx.Redis.ZIncrBy("gift_ranking_"+strconv.Itoa(int(req.AnchorID))+"_"+strconv.Itoa(time.Now().Day()), price*float64(req.Count), strconv.Itoa(int(req.UserID)))
+	l.svcCtx.Redis.Expire("gift_ranking_"+strconv.Itoa(int(req.AnchorID))+"_"+strconv.Itoa(time.Now().Day()), 24*time.Hour)
 	return &types.SendGiftResponse{}, nil
 
 }

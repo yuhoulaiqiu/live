@@ -2,10 +2,9 @@ package logic
 
 import (
 	"context"
+	"github.com/zeromicro/go-zero/core/logx"
 	"live/servers/rank_server/rank_api/internal/svc"
 	"live/servers/rank_server/rank_api/internal/types"
-
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type GetRoomRankLogic struct {

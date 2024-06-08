@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"live/common/response"
 	"live/servers/rank_server/rank_api/internal/svc"
@@ -120,7 +121,12 @@ func (s *GiftWSLogic) broadcastRankUpdates(roomNumber string) {
 		select {
 		case <-ticker.C:
 			// 获取礼物排行榜
-			roomKey := "gift_ranking_" + roomNumber[6:]
+			id, err := strconv.Atoi(roomNumber)
+			if err != nil {
+				fmt.Println("Error:", err)
+				return
+			}
+			roomKey := "gift_ranking_" + strconv.Itoa(id) + "_" + strconv.Itoa(time.Now().Day())
 			result, err := s.svcCtx.Redis.ZRevRangeWithScores(roomKey, 0, 9).Result()
 			if err != nil {
 				logx.Error(err)
