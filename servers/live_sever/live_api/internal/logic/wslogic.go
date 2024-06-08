@@ -3,13 +3,11 @@ package logic
 import (
 	"context"
 	"encoding/json"
-	"errors"
-	_ "fmt"
+	"fmt"
 	"github.com/go-redis/redis"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v3"
 	"github.com/zeromicro/go-zero/core/logx"
-	"live/common/response"
 	"live/models/live_models"
 	"live/servers/live_sever/live_api/internal/svc"
 	"net/http"
@@ -20,6 +18,7 @@ import (
 
 // 直播间全局化，一个直播间对应一个ws连接
 var rooms = make(map[string]map[*websocket.Conn]bool)
+var hostConnections = make(map[string]*websocket.Conn) // 存储每个房间的主播连接
 var Lock = sync.RWMutex{}
 
 type WebRTCLogic struct {
@@ -49,15 +48,14 @@ func (w *WebRTCLogic) HandleConnections(wr http.ResponseWriter, r *http.Request)
 	conn, err := upgrader.Upgrade(wr, r, nil)
 	if err != nil {
 		logx.Error(err)
-		response.Response(r, wr, nil, errors.New("websocket error"))
 		return
 	}
 
 	defer conn.Close()
 
 	roomNumber := r.URL.Query().Get("roomNumber")
-	if roomNumber == "" {
-		response.Response(r, wr, nil, errors.New("roomNumber is required"))
+	userId := r.URL.Query().Get("userId")
+	if roomNumber == "" || userId == "" {
 		return
 	}
 
@@ -65,7 +63,6 @@ func (w *WebRTCLogic) HandleConnections(wr http.ResponseWriter, r *http.Request)
 	var liveModel live_models.LiveModel
 	err = w.svcCtx.DB.Where("room_number = ?", roomNumber).First(&liveModel).Error
 	if err != nil {
-		response.Response(r, wr, nil, errors.New("房间号不存在"))
 		return
 	}
 
@@ -75,16 +72,24 @@ func (w *WebRTCLogic) HandleConnections(wr http.ResponseWriter, r *http.Request)
 		w.broadcast[roomNumber] = make(chan interface{})
 	}
 	rooms[roomNumber][conn] = true
+	str := fmt.Sprintf("%07s", userId)
+	isHost := roomNumber == str
+	if isHost {
+		hostConnections[roomNumber] = conn
+	}
 	Lock.Unlock()
-
-	go w.readMessages(conn, roomNumber)
-	go w.writeMessages(conn, roomNumber)
 	go w.broadcastRankUpdates(roomNumber)
+	go w.writeMessages(conn, roomNumber)
+	if isHost {
+		go w.readHostMessages(conn, roomNumber)
+	} else {
+		go w.readAudienceMessages(conn, roomNumber)
+	}
 
 	select {}
 }
 
-func (w *WebRTCLogic) readMessages(conn *websocket.Conn, roomNumber string) {
+func (w *WebRTCLogic) readHostMessages(conn *websocket.Conn, roomNumber string) {
 	defer conn.Close()
 	for {
 		_, message, err := conn.ReadMessage()
@@ -92,6 +97,9 @@ func (w *WebRTCLogic) readMessages(conn *websocket.Conn, roomNumber string) {
 			// 用户断开连接，将其从客户端列表中移除
 			Lock.Lock()
 			delete(rooms[roomNumber], conn)
+			if hostConnections[roomNumber] == conn {
+				delete(hostConnections, roomNumber)
+			}
 			Lock.Unlock()
 			break
 		}
@@ -101,12 +109,26 @@ func (w *WebRTCLogic) readMessages(conn *websocket.Conn, roomNumber string) {
 			logx.Error("Failed to unmarshal message:", err)
 			continue
 		}
-
+		// 根据消息类型处理
 		switch msg["type"] {
 		case "offer":
 			w.handleOffer(conn, roomNumber, msg)
 		case "candidate":
 			w.handleCandidate(conn, roomNumber, msg)
+		}
+	}
+}
+
+func (w *WebRTCLogic) readAudienceMessages(conn *websocket.Conn, roomNumber string) {
+	defer conn.Close()
+	for {
+		_, _, err := conn.ReadMessage()
+		if err != nil {
+			// 用户断开连接，将其从客户端列表中移除
+			Lock.Lock()
+			delete(rooms[roomNumber], conn)
+			Lock.Unlock()
+			break
 		}
 	}
 }
@@ -188,12 +210,12 @@ func (w *WebRTCLogic) handleOffer(conn *websocket.Conn, roomNumber string, msg m
 		return
 	}
 
-	r := map[string]interface{}{
+	response := map[string]interface{}{
 		"type": "answer",
 		"sdp":  answer.SDP,
 	}
 
-	w.broadcast[roomNumber] <- r
+	w.broadcast[roomNumber] <- response
 
 	// 启动FFmpeg推流
 	rtmpEndpoint := msg["rtmpEndpoint"].(string)

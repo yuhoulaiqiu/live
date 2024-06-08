@@ -62,7 +62,7 @@ live
 
 直播服务中提供四个api接口，一个websocket连接：创建/结束直播，进入/离开直播间，ws链接用于实时获取当前直播间在线人数
 
-PS：创建直播间后返回：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`
+PS：创建直播间后返回：类似于：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`的推流地址
 之后用户可以使用`ffmpeg`相关命令或者 **OBS软件**进行推流
 
 1. **前端获取媒体流**：用户授权并获取摄像头和麦克风流。

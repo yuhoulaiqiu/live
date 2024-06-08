@@ -68,7 +68,7 @@ service live {
 	@handler liveList
 	get /api/live/list returns (ListMessage) //直播列表
 
-	@handler people
+	@handler ws
 	get /api/live/ws/people (PeopleRequest) returns (PeopleRespones) //在线人数
 }
 

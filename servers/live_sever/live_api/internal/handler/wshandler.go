@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func peopleHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
+func wsHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		wsService := logic.NewWebRTCLogic(r.Context(), svcCtx)
 		wsService.HandleConnections(w, r)

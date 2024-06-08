@@ -35,7 +35,7 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			{
 				Method:  http.MethodGet,
 				Path:    "/api/live/ws/people",
-				Handler: peopleHandler(serverCtx),
+				Handler: wsHandler(serverCtx),
 			},
 		},
 	)
