@@ -33,7 +33,7 @@ func (l *RegisterLogic) Register(req *types.LoginRequest) error {
 	}
 	user = user_models.UserModel{
 		UserName: req.UserName,
-		NickName: "观众",
+		NickName: req.UserName,
 		Pwd:      pwd.HashPwd(req.Password),
 		Role:     2,
 		Avatar:   "../../../images/avatar.png",
