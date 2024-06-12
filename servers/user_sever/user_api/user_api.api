@@ -5,6 +5,8 @@ type UserInfoRequest {
 }
 
 type UserInfoResponse {
+	Username string `json:"username"`
+	Balance  int    `json:"balance"`
 	Nickname string `json:"nickname"`
 	Avatar   string `json:"avatar"`
 	Fans     int    `json:"fans"`
@@ -23,6 +25,9 @@ service user {
 
 	@handler follow
 	post /api/user/follow (FollowRequest) returns (FollowResponse)
+
+	@handler updateUserInfo
+	post /api/user/update (UserInfoResponse) returns (UserInfoResponse)
 }
 
 // goctl api go -api user_api.api -dir . --home ../../../template

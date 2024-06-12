@@ -36,7 +36,7 @@ func (l *RegisterLogic) Register(req *types.LoginRequest) error {
 		NickName: req.UserName,
 		Pwd:      pwd.HashPwd(req.Password),
 		Role:     2,
-		Avatar:   "../../../images/avatar.png",
+		Avatar:   "../../../models/images/avatar.png",
 		Fans:     0,
 	}
 	err = l.svcCtx.DB.Create(&user).Error

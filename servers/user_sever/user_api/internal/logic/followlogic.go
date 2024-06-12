@@ -60,8 +60,8 @@ func (l *FollowLogic) Follow(req *types.FollowRequest) (resp *types.FollowRespon
 		anchor.Fans--
 	}
 	err = l.svcCtx.DB.Save(&anchor).Error
-	//存入redis
 
+	//存入redis
 	err = l.svcCtx.Redis.ZAdd("fans_ranking", redis.Z{
 		Score:  float64(anchor.Fans),
 		Member: anchor.ID,

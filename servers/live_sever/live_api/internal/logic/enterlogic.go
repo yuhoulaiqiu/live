@@ -5,9 +5,9 @@ import (
 	"errors"
 	"github.com/zeromicro/go-zero/core/logx"
 	"live/models/live_models"
-	"live/models/user_models"
 	"live/servers/live_sever/live_api/internal/svc"
 	"live/servers/live_sever/live_api/internal/types"
+	"live/utils/cache"
 )
 
 type EnterLogic struct {
@@ -27,21 +27,23 @@ func NewEnterLogic(ctx context.Context, svcCtx *svc.ServiceContext) *EnterLogic 
 func (l *EnterLogic) Enter(req *types.EnterRequest) (*types.EnterResponse, error) {
 	// 获取直播间信息
 	var liveModel live_models.LiveModel
-	err := l.svcCtx.DB.Where("room_number = ?", req.RoomNumber).First(&liveModel).Error
+	//先查缓存
+	newCache := cache.NewCache(l.svcCtx.Redis, l.svcCtx.DB)
+	fetchFromDB := func() (interface{}, error) {
+		err := l.svcCtx.DB.Where("room_number = ?", req.RoomNumber).First(&liveModel).Error
+		if err != nil {
+			return nil, err
+		}
+		return liveModel, nil
+	}
+	expire := newCache.GetRandomExpire(24)
+	data, err := newCache.GetOrSetCache(l.ctx, "roomInfo:"+req.RoomNumber, fetchFromDB, live_models.LiveModel{}, expire)
 	if err != nil {
-		return nil, errors.New("直播间不存在")
+		logx.Errorf("获取直播间信息失败: %v", err)
+		return nil, errors.New("获取直播间信息失败")
 	}
-	//改变用户所在直播间
-	var userLiveModel user_models.UserModel
-	err = l.svcCtx.DB.Where("id = ?", req.UserID).First(&userLiveModel).Error
-	if err != nil {
-		return nil, errors.New("用户不存在")
-	}
-	if userLiveModel.InWhich == req.RoomNumber {
-	} else {
-		userLiveModel.InWhich = req.RoomNumber
-		l.svcCtx.DB.Save(&userLiveModel)
-	}
+	liveModel = data.(live_models.LiveModel)
+
 	// 获取直播流地址
 	RTMPAddress := "http://127.0.0.1:7001/live/" + req.RoomNumber + ".flv"
 	resp := &types.EnterResponse{

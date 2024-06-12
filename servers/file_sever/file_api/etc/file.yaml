@@ -1,0 +1,19 @@
+Name: file
+Host: 0.0.0.0
+Port: 20004
+Etcd: 127.0.0.1:2379
+Log:
+  Encoding: plain
+  TimeFormat: 2006-01-02 15:04:05
+  Level: info
+  Stat: false
+FileSize: 0.5
+WhiteList:
+  - .png
+  - .jpg
+  - .jpeg
+  - .gif
+  - .webp
+  - .bmp
+MaxBytes: 5368709120
+UploadDir: ../../../models/images

@@ -14,6 +14,8 @@ type UserInfoRequest struct {
 }
 
 type UserInfoResponse struct {
+	Username string `json:"username"`
+	Balance  int    `json:"balance"`
 	Nickname string `json:"nickname"`
 	Avatar   string `json:"avatar"`
 	Fans     int    `json:"fans"`
