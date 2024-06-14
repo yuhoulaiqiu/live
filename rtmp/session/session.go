@@ -65,7 +65,7 @@ func (s *Session) Handshake() error {
 
 	// 验证 C2 是否与 S1 匹配
 	if !utils.ValidateC2(s0s1s2[1:1537], c2) {
-		return errors.New("C2 validation failed")
+		return errors.New("c2 validation failed")
 	}
 
 	log.Println("RTMP handshake completed")

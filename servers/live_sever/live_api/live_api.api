@@ -55,6 +55,13 @@ type PeopleRequest {
 
 type PeopleRespones {}
 
+type ConferenceRequest {
+	RoomNumber string `form:"roomNumber"` //直播间号
+	UserID     uint   `header:"User-ID"` //用户ID
+}
+
+type ConferenceRespones {}
+
 service live {
 	@handler create
 	post /api/live/create (CreateRequest) returns (CreateResponse) //创建直播间
@@ -69,7 +76,10 @@ service live {
 	get /api/live/list returns (ListMessage) //直播列表
 
 	@handler ws
-	get /api/live/ws/people (PeopleRequest) returns (PeopleRespones) //在线人数
+	get /api/live/ws/people (PeopleRequest) returns (PeopleRespones)
+
+	@handler conferenceWs
+	get /api/live/ws/conference (ConferenceRequest) returns (ConferenceRespones) //会议室
 }
 
 // goctl api go -api live_api.api -dir . --home ../../../template

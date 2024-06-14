@@ -79,7 +79,7 @@ func (l *ConferenceWsLogic) readMessages(conn *websocket.Conn, roomNumber string
 			break
 		}
 
-		action, ok := message["action"].(string)
+		action, ok := message["type"].(string)
 		if !ok {
 			l.Logger.Error("Invalid action")
 			continue
@@ -121,7 +121,6 @@ func (l *ConferenceWsLogic) handleOffer(conn *websocket.Conn, roomNumber string,
 	// 创建一个新的PeerConnection
 	pc, err := webrtc.NewPeerConnection(webrtc.Configuration{})
 	if err != nil {
-		// 如果创建PeerConnection失败，记录错误并返回
 		l.Logger.Error("Error creating peer connection:", err)
 		return
 	}
@@ -137,72 +136,79 @@ func (l *ConferenceWsLogic) handleOffer(conn *websocket.Conn, roomNumber string,
 				l.Logger.Error("Error marshalling candidate:", err)
 				return
 			}
-			// 创建一个包含候选人的消息
+			// 创建一个包含候选的消息
 			message := map[string]interface{}{
-				"action":    "candidate",
-				"candidate": string(candidate),
+				"type": "candidate",
+				"code": 200,
+				"msg":  string(candidate),
 			}
 			// 将消息发送到房间的广播通道
 			l.broadcast[roomNumber] <- message
 		}
 	})
 
-	// 当收到新的媒体轨道时的处理函数
+	// 当检测到新的媒体轨道时，设置处理程序
 	pc.OnTrack(func(track *webrtc.TrackRemote, receiver *webrtc.RTPReceiver) {
 		// 记录收到的媒体轨道类型
 		l.Logger.Infof("Got track: %s", track.Kind().String())
 
-		// 创建一个本地的静态RTP媒体轨道，其参数与收到的远程媒体轨道相同
+		// 创建一个新的本地媒体轨道，其属性与远程媒体轨道相同
 		localTrack, err := webrtc.NewTrackLocalStaticRTP(track.Codec().RTPCodecCapability, track.ID(), track.StreamID())
 		if err != nil {
-			// 如果创建本地媒体轨道失败，记录错误并返回
 			l.Logger.Error("Error creating local track:", err)
 			return
 		}
 
-		// 读取房间信息，准备向房间内的其他连接发送媒体轨道
+		// 启动一个新的goroutine来读取从远程媒体轨道发送的RTP包
+		go func() {
+			// 创建一个缓冲区来存储读取的RTP包
+			buf := make([]byte, 1500)
+			// 循环读取RTP包，直到出现错误
+			for {
+				if _, _, rtcpErr := track.Read(buf); rtcpErr != nil {
+					l.Logger.Error("Error reading from remote track:", rtcpErr)
+					return
+				}
+			}
+		}()
 		CLock.RLock()
-		for wsConn := range CRooms[roomNumber] {
-			// 不向发送offer的连接发送媒体轨道
+		// 获取当前房间的所有WebSocket连接
+		roomConnections := CRooms[roomNumber]
+		CLock.RUnlock()
+
+		// 遍历当前房间的所有WebSocket连接
+		for wsConn := range roomConnections {
+			// 如果当前的WebSocket连接不是发送offer的连接
 			if wsConn != conn {
+				// 获取当前房间的PeerConnection
 				pc, ok := l.pc[roomNumber]
 				if ok {
-					// 将本地媒体轨道添加到PeerConnection
+					// 尝试将新的媒体轨道添加到PeerConnection
 					rtpSender, err := pc.AddTrack(localTrack)
 					if err != nil {
 						l.Logger.Error("Error adding track to peer connection:", err)
 						continue
 					}
 
-					// 在新的goroutine中读取RTP数据并发送
-					go func() {
+					// 启动一个新的goroutine来读取从这个新添加的轨道发送的RTP包
+					go func(rtpSender *webrtc.RTPSender) {
+						// 创建一个缓冲区来存储读取的RTP包
 						buf := make([]byte, 1500)
 						for {
 							if _, _, rtcpErr := rtpSender.Read(buf); rtcpErr != nil {
+								l.Logger.Error("Error reading from RTP sender:", rtcpErr)
 								return
 							}
 						}
-					}()
+					}(rtpSender)
 				}
 			}
 		}
-		CLock.RUnlock()
-
-		// 在新的goroutine中读取远程媒体轨道的RTP数据
-		go func() {
-			buf := make([]byte, 1500)
-			for {
-				if _, _, rtcpErr := track.Read(buf); rtcpErr != nil {
-					return
-				}
-			}
-		}()
 	})
 
 	// 设置远程描述，这里的offer是从对方那里接收到的
 	err = pc.SetRemoteDescription(offer)
 	if err != nil {
-		// 如果设置失败，记录错误并返回
 		l.Logger.Error("Error setting remote description:", err)
 		return
 	}
@@ -210,7 +216,6 @@ func (l *ConferenceWsLogic) handleOffer(conn *websocket.Conn, roomNumber string,
 	// 创建应答
 	answer, err := pc.CreateAnswer(nil)
 	if err != nil {
-		// 如果创建应答失败，记录错误并返回
 		l.Logger.Error("Error creating answer:", err)
 		return
 	}
@@ -218,7 +223,6 @@ func (l *ConferenceWsLogic) handleOffer(conn *websocket.Conn, roomNumber string,
 	// 设置本地描述，这里的answer是我们自己创建的
 	err = pc.SetLocalDescription(answer)
 	if err != nil {
-		// 如果设置失败，记录错误并返回
 		l.Logger.Error("Error setting local description:", err)
 		return
 	}
@@ -231,8 +235,9 @@ func (l *ConferenceWsLogic) handleOffer(conn *websocket.Conn, roomNumber string,
 
 	// 创建一个包含应答的消息
 	message = map[string]interface{}{
-		"action": "answer",
-		"answer": string(answerJSON),
+		"type": "answer",
+		"code": 200,
+		"msg":  string(answerJSON),
 	}
 	// 将消息发送到房间的广播通道
 	l.broadcast[roomNumber] <- message
