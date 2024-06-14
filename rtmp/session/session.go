@@ -32,43 +32,72 @@ func (s *Session) GetConn() net.Conn {
 	return s.conn
 }
 
+//在rtmp连接建立以后，服务端要与客户端通过3次交换报文完成握手。
+//与其他握手协议不同，rtmp协议握手交换的数据报文是固定大小的，客户端向服务端发送的3个报文为c0、c1、c2，
+//服务端向客户端发送的3个报文为s0、s1、s2。c0与s0的大小为1个字节，c1与s1的大小为1536个字节，c2与s2的大小为1536个字节。
+//发送顺序
+//建立连接后，客户端开始发送C0、C1块到服务器；
+//服务器端收到C0或C1后发送S0和S1；
+//当客户端收齐S0和S1之后，开始发送C2；
+//当服务端收齐C0和C1后，开发发送S2；
+//当客户端收到S2，服务端收到C2，握手完成。
+//在实际工程应用中，一般是客户端将C0、C1块同时发出，服务器在收到C1块之后同时将S0、S1、S2发给客户端。
+//客户端收到S1之后，发送C2给服务端，握手完成。
+
 // Handshake 进行 RTMP 握手
 func (s *Session) Handshake() error {
+	//C0和S0数据包占用一个字节，表示RTMP版本号。
+	//目前RTMP版本定义为3,0-2是早期的专利产品所使用的值,现已经废弃,4-31是预留值,32-255是禁用值。
+
 	// 第一步：接收 C0 和 C1
 	c0c1 := make([]byte, 1537)
 	if err := utils.ReadFullWithTimeout(s.conn, c0c1, 5*time.Second); err != nil {
 		return err
 	}
 	if c0c1[0] != 0x03 {
-		return errors.New("unsupported RTMP version")
+		return errors.New("不支持的 RTMP 版本")
 	}
 	c1 := c0c1[1:]
+	// 解析 C1
+	c1Timestamp := c1[:4]
 
-	// 第二步：发送 S0、S1 和 S2
-	s0s1s2 := make([]byte, 3073)
-	s0s1s2[0] = 0x03
+	// 第二步：发送 S0 和 S1
+	s0s1 := make([]byte, 1537)
+	s0s1[0] = 0x03
+
+	//C1和S1数据包占用1536个字节。包含4个字节的时间戳，4个字节的0和1528个字节的随机数。
 	// 填充 S1
-	if err := utils.FillRandomBytes(s0s1s2[1:1537]); err != nil {
+	s1Timestamp := make([]byte, 4)
+	copy(s1Timestamp, c1Timestamp) // 使用相同的时间戳
+	copy(s0s1[1:5], s1Timestamp)
+	copy(s0s1[5:9], make([]byte, 4)) // 4 个字节的 0
+	if err := utils.FillRandomBytes(s0s1[9:1537]); err != nil {
 		return err
 	}
-	// 填充 S2
-	copy(s0s1s2[1537:], c1)
-	if err := utils.WriteWithTimeout(s.conn, s0s1s2, 5*time.Second); err != nil {
+	if err := utils.WriteWithTimeout(s.conn, s0s1, 5*time.Second); err != nil {
 		return err
 	}
-
+	//C2和S2数据包占用1536个字节，包含4个字节的时间戳，4个字节的对端的时间戳（C2数据包为S1数据包的时间戳，S2为C1数据包的时间戳）。
 	// 第三步：接收 C2
 	c2 := make([]byte, 1536)
 	if err := utils.ReadFullWithTimeout(s.conn, c2, 5*time.Second); err != nil {
 		return err
 	}
 
-	// 验证 C2 是否与 S1 匹配
-	if !utils.ValidateC2(s0s1s2[1:1537], c2) {
-		return errors.New("c2 validation failed")
+	// 验证 C2
+	if !utils.ValidateC2(s0s1[1:5], c2[:4]) {
+		return errors.New("c2 验证失败")
 	}
 
-	log.Println("RTMP handshake completed")
+	// 第四步：发送 S2
+	s2 := make([]byte, 1536)
+	copy(s2[:4], s1Timestamp)  // S2 的时间戳为 S1 的时间戳
+	copy(s2[4:8], c1Timestamp) // S2 的对端时间戳为 C1 的时间戳
+	if err := utils.WriteWithTimeout(s.conn, s2, 5*time.Second); err != nil {
+		return err
+	}
+
+	log.Println("RTMP 握手完成")
 	return nil
 }
 
