@@ -222,6 +222,21 @@ func ParseCommandName(payload []byte) (string, error) {
 	return string(payload[3 : 3+length]), nil
 }
 
+// ParseCommandPayload 解析命令   待实现
+func ParseCommandPayload(payload []byte) (uint32, any, error) {
+	return 0, nil, nil
+}
+
+// ParsePublishPayload 解析发布命令的Payload   待实现
+func ParsePublishPayload(payload []byte) (string, string, error) {
+	return "", "", nil
+}
+
+func ParsePlayPayload(payload []byte) (string, int, int, bool, error) {
+	return "", 0, 0, false, nil
+
+}
+
 // sendConnectResponse 发送 connect 命令的响应
 func (p *Protocol) sendConnectResponse() error {
 	response := []byte{

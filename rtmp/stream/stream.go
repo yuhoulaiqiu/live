@@ -53,34 +53,34 @@ func (s *Stream) PushData(data []byte) {
 
 // StreamManager 管理所有 RTMP 流
 type StreamManager struct {
-	streams map[uint32]*Stream
-	mutex   sync.Mutex
+	Streams map[uint32]*Stream
+	Mutex   sync.Mutex
 }
 
 // NewStreamManager 创建一个新的 StreamManager
 func NewStreamManager() *StreamManager {
 	return &StreamManager{
-		streams: make(map[uint32]*Stream),
+		Streams: make(map[uint32]*Stream),
 	}
 }
 
 // CreateStream 创建新的流
 func (sm *StreamManager) CreateStream(id uint32) (*Stream, error) {
-	sm.mutex.Lock()
-	defer sm.mutex.Unlock()
-	if _, exists := sm.streams[id]; exists {
+	sm.Mutex.Lock()
+	defer sm.Mutex.Unlock()
+	if _, exists := sm.Streams[id]; exists {
 		return nil, errors.New("stream already exists")
 	}
 	stream := NewStream(id)
-	sm.streams[id] = stream
+	sm.Streams[id] = stream
 	return stream, nil
 }
 
 // GetStream 获取指定 ID 的流
 func (sm *StreamManager) GetStream(id uint32) (*Stream, error) {
-	sm.mutex.Lock()
-	defer sm.mutex.Unlock()
-	stream, exists := sm.streams[id]
+	sm.Mutex.Lock()
+	defer sm.Mutex.Unlock()
+	stream, exists := sm.Streams[id]
 	if !exists {
 		return nil, errors.New("stream not found")
 	}
@@ -89,7 +89,7 @@ func (sm *StreamManager) GetStream(id uint32) (*Stream, error) {
 
 // DeleteStream 删除指定 ID 的流
 func (sm *StreamManager) DeleteStream(id uint32) {
-	sm.mutex.Lock()
-	defer sm.mutex.Unlock()
-	delete(sm.streams, id)
+	sm.Mutex.Lock()
+	defer sm.Mutex.Unlock()
+	delete(sm.Streams, id)
 }

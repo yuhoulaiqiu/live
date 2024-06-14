@@ -1,7 +1,10 @@
 package session
 
 import (
+	"encoding/binary"
+	"encoding/json"
 	"errors"
+	"github.com/zeromicro/go-zero/core/logx"
 	"live/rtmp/protocol"
 	"live/rtmp/stream"
 	"live/rtmp/utils"
@@ -135,46 +138,187 @@ func (s *Session) handleStreamCommand(msg *protocol.Message) error {
 		return err
 	}
 
+	transactionID, commandObject, err := protocol.ParseCommandPayload(msg.Payload)
+	if err != nil {
+		return err
+	}
+
 	switch commandName {
 	case "createStream":
-		return s.handleCreateStream()
+		return s.handleCreateStream(transactionID, commandObject)
 	case "publish":
-		return s.handlePublish()
+		return s.handlePublish(transactionID, commandObject, msg.Payload)
 	case "play":
-		return s.handlePlay()
+		return s.handlePlay(transactionID, commandObject, msg.Payload)
 	default:
 		return nil
 	}
 }
 
+//createStream的整体架构：使用字符串类型标识命令的类型，恒为“createStream”；
+//然后使用number类型标识事务ID；
+//紧接着是command相关的信息，如果存在，用set表示，如果没有，则使用null类型表示。
+//客户端发送createStream请求之后，服务端会反馈一个结果给客户端，如果成功，则返回_result，如果失败，则返回_error。
+//返回的消息的整体与createStream类似，commandName为固定为"_result"或者"_error"，
+//transcationID为createStream中的ID，
+//commandObject也是与createStream一样的组织方式。
+//不同的是多了一个streamID，成功的时候，返回一个streamID，失败的时候返回失败的原因，类似于错误码。
+
 // handleCreateStream 处理 createStream 命令
-func (s *Session) handleCreateStream() error {
-	streamID := uint32(1) //id先写死
+func (s *Session) handleCreateStream(transactionID uint32, commandObject interface{}) error {
+	streamID := s.generateStreamID()
+
+	// 创建新的流
 	stream, err := s.streamManager.CreateStream(streamID)
+	if err != nil {
+		return s.sendCreateStreamResponse("_error", transactionID, commandObject, err.Error())
+	}
+
+	s.currentStream = stream
+	log.Printf("Stream %d created", streamID)
+
+	// 发送成功响应
+	return s.sendCreateStreamResponse("_result", transactionID, commandObject, streamID)
+}
+
+// generateStreamID 生成新的 streamID
+func (s *Session) generateStreamID() uint32 {
+	s.streamManager.Mutex.Lock()
+	defer s.streamManager.Mutex.Unlock()
+	var id uint32 = 1
+	for {
+		if _, exists := s.streamManager.Streams[id]; !exists {
+			return id
+		}
+		id++
+	}
+}
+
+// sendCreateStreamResponse 发送 createStream 响应
+func (s *Session) sendCreateStreamResponse(commandName string, transactionID uint32, commandObject interface{}, result interface{}) error {
+	response := map[string]interface{}{
+		"commandName":   commandName,
+		"transactionID": transactionID,
+		"commandObject": commandObject,
+		"result":        result,
+	}
+
+	responseBytes, err := json.Marshal(response)
 	if err != nil {
 		return err
 	}
-	s.currentStream = stream
-	log.Printf("Stream %d created", streamID)
+
+	// 发送响应数据
+	if _, err := s.conn.Write(responseBytes); err != nil {
+		return err
+	}
 	return nil
 }
 
 // handlePublish 处理 publish 命令
-func (s *Session) handlePublish() error {
+func (s *Session) handlePublish(transactionID uint32, commandObject interface{}, payload []byte) error {
 	if s.currentStream == nil {
 		return errors.New("没有可供发布的流媒体")
 	}
+
+	// 解析 publishName 和 publishType
+	publishName, publishType, err := protocol.ParsePublishPayload(payload)
+	if err != nil {
+		return err
+	}
+
+	// 设置当前会话为流的发布者
 	s.currentStream.Publisher = s
-	log.Printf("Publishing to stream %d", s.currentStream.ID)
+	log.Printf("Publishing to stream %d with name %s and type %s", s.currentStream.ID, publishName, publishType)
+
+	// 发送 onStatus 响应
+	return s.sendOnStatusResponse("onStatus", 0, nil, map[string]interface{}{
+		"level":       "status",
+		"code":        "NetStream.Publish.Start",
+		"description": "Publishing stream started",
+		"details":     publishName,
+	})
+}
+
+//客户端发送publish消息给rtmp服务端后，服务端会向客户端反馈一条消息，该消息采用了onStatus，onStatus的消息格式如下：
+//onStatus消息由四部分组成：
+//command Name：表示消息类型，恒为“onStatus”;
+//transaction ID：设为0；
+//command Object：用null表示；
+//info Object：使用object类型表示多个字段，一般有warn，status，code，description等状态。
+
+// sendOnStatusResponse 发送 onStatus 响应
+func (s *Session) sendOnStatusResponse(commandName string, transactionID uint32, commandObject interface{}, infoObject map[string]interface{}) error {
+	response := map[string]interface{}{
+		"commandName":   commandName,
+		"transactionID": transactionID,
+		"commandObject": commandObject,
+		"infoObject":    infoObject,
+	}
+
+	responseBytes, err := json.Marshal(response)
+	if err != nil {
+		return err
+	}
+
+	// 发送响应数据
+	if _, err := s.conn.Write(responseBytes); err != nil {
+		return err
+	}
 	return nil
 }
 
+//commandName：命令的名称，为“connect”;
+//transaction ID：事务ID，用number类型表示；
+//command Object：如果有，用object类型表示，如果没有，则使用null类型指明；
+//stream Name：请求的流的名称，一般在url中application后面的字段，如rtmp://192.17.1.202:1935/live/test，live为application，test为流的名称；
+//start：可选字段，使用number类型表示，指示开始时间，默认值为-2，表示客户端首先尝试命名为streamName的实时流（官方文档中说以秒单位，实际抓包文件中看到的单位应该是毫秒）
+//duration：可选字段，用number类型表示，指定播放时间，默认值为-1，表示播放到流结束；
+//reset：可选字段，用boolean类型表示，用来指示是否刷新之前的播放列表；
+
 // handlePlay 处理 play 命令
-func (s *Session) handlePlay() error {
+func (s *Session) handlePlay(transactionID uint32, commandObject interface{}, payload []byte) error {
 	if s.currentStream == nil {
 		return errors.New("无播放流")
 	}
+
+	// 解析 play 参数
+	streamName, start, duration, reset, err := protocol.ParsePlayPayload(payload)
+	if err != nil {
+		return err
+	}
+	logx.Infof("start: %d, duration: %d, reset: %t", start, duration, reset)
+	// 将当前会话添加到流的订阅者列表
 	s.currentStream.AddSubscriber(s)
-	log.Printf("Playing stream %d", s.currentStream.ID)
-	return nil
+	log.Printf("Playing stream %d with name %s", s.currentStream.ID, streamName)
+
+	// 发送 onStatus 响应
+	return s.sendOnStatusResponse("onStatus", 0, nil, map[string]interface{}{
+		"level":       "status",
+		"code":        "NetStream.Play.Start",
+		"description": "Playing stream started",
+		"details":     streamName,
+	})
+}
+
+// handleSetChunkSize 处理 setChunkSize 消息
+func (s *Session) handleSetChunkSize(chunkSize uint32) error {
+	header := protocol.ChunkHeader{
+		Format:        0,
+		ChunkStreamID: 2,
+		Timestamp:     0,
+		BodySize:      4,
+		TypeID:        0x01, // setChunkSize 消息类型
+		StreamID:      0,
+	}
+
+	payload := make([]byte, 4)
+	binary.BigEndian.PutUint32(payload, chunkSize)
+
+	msg := &protocol.Message{
+		Header:  header,
+		Payload: payload,
+	}
+
+	return s.protocol.WriteMessage(msg)
 }
