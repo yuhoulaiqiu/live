@@ -187,6 +187,9 @@ func writeUint24(b []byte, v uint32) {
 	b[2] = byte(v)
 }
 
+//当rtmp客户端和rtmp服务端握手完成之后，客户端就会向服务端发送connect消息。connect消息的格式按照RTMP Header+RTMP Body的格式组织。
+//其中RTMP Header的Type ID为0x14，表示以AMF0编码的command消息。
+
 // HandleCommand 处理 RTMP 命令消息
 func (p *Protocol) HandleCommand(msg *Message) error {
 	// 简单处理 connect 命令
@@ -218,9 +221,6 @@ func ParseCommandName(payload []byte) (string, error) {
 	}
 	return string(payload[3 : 3+length]), nil
 }
-
-//当rtmp客户端和rtmp服务端握手完成之后，客户端就会向服务端发送connect消息。connect消息的格式按照RTMP Header+RTMP Body的格式组织。
-//其中RTMP Header的Type ID为0x14，表示以AMF0编码的command消息。
 
 // sendConnectResponse 发送 connect 命令的响应
 func (p *Protocol) sendConnectResponse() error {

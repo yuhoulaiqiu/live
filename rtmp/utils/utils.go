@@ -11,6 +11,7 @@ import (
 
 // FillRandomBytes 填充随机字节
 func FillRandomBytes(b []byte) error {
+	// 通过 crypto/rand 包填充随机字节
 	_, err := rand.Read(b)
 	return err
 }

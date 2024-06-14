@@ -162,7 +162,7 @@ func (s *Session) handleCreateStream() error {
 // handlePublish 处理 publish 命令
 func (s *Session) handlePublish() error {
 	if s.currentStream == nil {
-		return errors.New("no stream available for publishing")
+		return errors.New("没有可供发布的流媒体")
 	}
 	s.currentStream.Publisher = s
 	log.Printf("Publishing to stream %d", s.currentStream.ID)
@@ -172,7 +172,7 @@ func (s *Session) handlePublish() error {
 // handlePlay 处理 play 命令
 func (s *Session) handlePlay() error {
 	if s.currentStream == nil {
-		return errors.New("no stream available for playing")
+		return errors.New("无播放流")
 	}
 	s.currentStream.AddSubscriber(s)
 	log.Printf("Playing stream %d", s.currentStream.ID)
