@@ -8,44 +8,42 @@
 
 ```
 live
-├─ main.go
-├─ utils
+├─ main.go // 创建数据库
+├─ utils // 工具类
 ├─ servers
 │  ├─ user_sever
-│  │  └─ user_api
+│  │  └─ user_api // 用户api服务
 │  ├─ rank_server
-│  │  └─ rank_api
+│  │  └─ rank_api // 排行榜api服务
 │  ├─ log_sever
-│  │  └─ log_api.api
+│  │  └─ log_api.api // 日志api服务
 │  ├─ live_sever
-│  │  └─ live_api
+│  │  └─ live_api // 直播api服务
 │  ├─ interact_server
-│  │  └─ interact_api
+│  │  └─ interact_api // 互动api服务
 │  ├─ gateway_sever
-│  │  ├─ gateway.go
+│  │  ├─ gateway.go // 网关服务
 │  │  └─ settings.yaml
 │  ├─ file_sever
-│  │  └─ file_api
+│  │  └─ file_api // 文件api服务
 │  └─ auth_sever
-│     └─ auth_api
+│     └─ auth_api // 认证api服务
 ├─ rtmp
-│  ├─ utils
-│  ├─ stream
-│  ├─ session
-│  ├─ server
-│  ├─ protocol
-│  └─ common
-├─ models
-├─ core
-└─ common
-   ├─ response
-   │  └─ enter.go
-   ├─ models
-   │  └─ enter.go
+│  ├─ utils // 工具类
+│  ├─ stream // 流管理
+│  ├─ session // 会话管理
+│  ├─ server // 启动服务
+│  ├─ protocol // 处理 RTMP 协议的相关操作
+│  └─ common // 公共模块
+├─ models // 数据库模型
+├─ core // 初始化服务
+└─ common // 公共模块
+   ├─ response // 响应封装
+   ├─ models // 数据库公共模型
    ├─ middleware
-   │  └─ log_middleware.go
+   │  └─ log_middleware.go // 全局日志中间件
    └─ etcd
-      └─ delivery_address.go
+      └─ delivery_address.go // 上送服务地址
 
 ```
 
@@ -69,9 +67,9 @@ live
 
 直播服务中提供四个api接口，一个websocket连接：创建/结束直播，进入/离开直播间，ws链接用于实时获取当前直播间在线人数、处理WebRTC Offer、交换ICE候选
 
-**创建直播法一：**创建直播间后返回类似于：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`的推流地址，之后用户可以使用`ffmpeg`相关命令或者 **OBS软件**进行推流
+**创建直播法一**创建直播间后返回类似于：`rtmp://localhost:1935/live/rfBd56ti2SMtYvSgD5xAV0YU99zampta7Z7S575KLkIZ9PYk`的推流地址，之后用户可以使用`ffmpeg`相关命令或者 **OBS软件**进行推流
 
-**创建直播法二：**(需要前端配合，无法测试到底对不对(╥﹏╥)
+**创建直播法二**(需要前端配合，无法测试到底对不对(╥﹏╥)
 
 1. **前端获取媒体流**：用户授权并获取摄像头和麦克风流。
 2. **前端请求创建直播**：前端通过HTTP请求后端API创建直播会话。
