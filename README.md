@@ -8,44 +8,50 @@
 
 ```
 live
-├─ go.mod // 依赖管理
-├─ go.sum // 依赖管理
-├─ main.go // 创建数据库表
-├─ README.md // 项目介绍
-├─ utils // 工具类
-│  ├─ enter.go
-│  ├─ stream
-│  ├─ random
-│  ├─ pwd
-│  ├─ maps
-│  ├─ jwts
-│  └─ ips
-├─ servers // 服务
+├─ main.go
+├─ utils
+├─ servers
 │  ├─ user_sever
-│  │  └─ user_api // 用户api服务
+│  │  └─ user_api
 │  ├─ rank_server
-│  │  └─ rank_api // 排行榜api服务
-│  ├─ log_server
-│  │  └─ log_api // 日志api服务
+│  │  └─ rank_api
+│  ├─ log_sever
+│  │  └─ log_api.api
+│  ├─ live_sever
+│  │  └─ live_api
 │  ├─ interact_server
-│  │  └─ interact_api // 互动api服务
-│  ├─ live_server
-│  │  └─ live_api // 直播api服务
-│  ├─ gateway_sever // 网关服务
+│  │  └─ interact_api
+│  ├─ gateway_sever
+│  │  ├─ gateway.go
+│  │  └─ settings.yaml
+│  ├─ file_sever
+│  │  └─ file_api
 │  └─ auth_sever
-│     └─ auth_api // 认证api服务
-├─ models  // 数据库模型
-├─ core    // 初始化工具
-└─ common // 公共模块
-    ├─ response // 响应
-    ├─ models // 数据库模型
-    ├─ middleware // 中间件
-    └─ etcd // etcd配置
+│     └─ auth_api
+├─ rtmp
+│  ├─ utils
+│  ├─ stream
+│  ├─ session
+│  ├─ server
+│  ├─ protocol
+│  └─ common
+├─ models
+├─ core
+└─ common
+   ├─ response
+   │  └─ enter.go
+   ├─ models
+   │  └─ enter.go
+   ├─ middleware
+   │  └─ log_middleware.go
+   └─ etcd
+      └─ delivery_address.go
+
 ```
 
 ## 具体功能介绍
 
-服务共被分为6大板块
+服务共被分为8大板块
 
 #### gateway 网关服务
 
@@ -85,6 +91,15 @@ live
 
 排行服务中提供三个api接口，两个websocket连接：直播间观众数/主播粉丝数/直播间收益排行榜，一个websocket实时获取三大排行榜信息，另一个实时获取直播间内~~高能用户~~榜一大哥排行榜
 
+#### log 日志服务
+
+待完成...
+
+#### file 文件服务
+
+处理头像，视频等文件上传的服务
+待完成...
+
 **接口文档详情**~~请看VCR~~ 上链接！[apifox接口文档](https://apifox.com/apidoc/shared-d0a18190-ea8a-44a2-9464-ef1b5a7aded1)
 
 ## 项目亮点
@@ -92,7 +107,6 @@ live
 emmmmmm
 
 ![](./models/images/wo.jpg)
-
 
 
 
