@@ -101,13 +101,16 @@ live
 
 **接口文档详情**~~请看VCR~~ 上链接！[apifox接口文档](https://apifox.com/apidoc/shared-d0a18190-ea8a-44a2-9464-ef1b5a7aded1)
 
+#### RTMP
+
+自己写了一部分RTMP服务，因为~~时间~~（人菜）的关系，只有一个架子，后续~~可能~~会继续完善
+
+写了的部分： 流管理、会话管理、启动服务、处理 RTMP 协议的相关操作
+
 ## 项目亮点
 
 emmmmmm
 
 ![](./models/images/wo.jpg)
-
-
-
 
 ......未完待续
